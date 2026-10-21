@@ -5,7 +5,14 @@ services:
       dockerfile: Dockerfile
     image: sloperator-sandbox:latest
     container_name: sloperator-sandbox
-    user: "1000:1000"
+    environment:
+      UV_LINK_MODE: copy
     volumes:
-      - ./:/workspace
+      - ./:/root/workspace
       - ~/.config/opencode:/root/.config/opencode:ro
+      - sloperator-venv:/root/workspace/.venv
+    entrypoint:
+      ["/bin/sh", "-c", "cd /root/workspace && uv sync && opencode serve"]
+
+volumes:
+  sloperator-venv:
