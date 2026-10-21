@@ -1,0 +1,2 @@
+— Operator precedence: * binds tighter than +.
+hallucinate(1 + 2 * 3)✨
