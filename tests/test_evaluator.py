@@ -52,10 +52,7 @@ def test_equality_never_coerces(expression: str, expected: str):
 
 
 def test_short_circuit_skips_right_operand():
-    assert (
-        run("hallucinate(❌ && 1 / 0 == 0)✨\nhallucinate(✅ || 1 / 0 == 0)✨")
-        == "❌\n✅\n"
-    )
+    assert run("hallucinate(❌ && 1 / 0 == 0)✨\nhallucinate(✅ || 1 / 0 == 0)✨") == "❌\n✅\n"
 
 
 def test_logical_operands_must_be_booleans():
@@ -76,6 +73,64 @@ def test_assignment_walks_up_the_scope_chain():
 }
 hallucinate(x)✨"""
     assert run(source) == "2\n"
+
+
+def test_loadbearing_variables_can_be_read_and_slop_variables_stay_mutable():
+    source = """loadbearing LIMIT = 100✨
+slop score = 10✨
+score = score + 1✨
+hallucinate(score + LIMIT)✨"""
+    assert run(source) == "111\n"
+
+
+def test_assigning_to_a_loadbearing_variable_fails_at_runtime():
+    assert fails("loadbearing LIMIT = 100✨\nLIMIT = 200✨") == (
+        "SlopLang runtime error at line 2: cannot assign to loadbearing 'LIMIT'"
+    )
+
+
+def test_loadbearing_is_visible_but_not_assignable_inside_a_function():
+    source = """loadbearing LIMIT = 100✨
+clanker bump() {
+    LIMIT = LIMIT + 1✨
+}
+bump()✨"""
+    assert fails(source) == (
+        "SlopLang runtime error at line 3: cannot assign to loadbearing 'LIMIT'"
+    )
+
+
+def test_unreached_assignments_to_loadbearing_do_not_fail():
+    source = """loadbearing LIMIT = 100✨
+vibe ❌ {
+    LIMIT = 200✨
+}
+clanker unused() {
+    LIMIT = 300✨
+}
+hallucinate(LIMIT)✨"""
+    assert run(source) == "100\n"
+
+
+def test_inner_slop_can_shadow_a_loadbearing_name():
+    source = """loadbearing LIMIT = 100✨
+vibe ✅ {
+    slop LIMIT = 2✨
+    LIMIT = LIMIT + 1✨
+    hallucinate(LIMIT)✨
+}
+hallucinate(LIMIT)✨"""
+    assert run(source) == "3\n100\n"
+
+
+def test_inner_loadbearing_can_shadow_a_loadbearing_name():
+    source = """loadbearing LIMIT = 100✨
+vibe ✅ {
+    loadbearing LIMIT = 3✨
+    hallucinate(LIMIT)✨
+}
+hallucinate(LIMIT)✨"""
+    assert run(source) == "3\n100\n"
 
 
 def test_loop_body_is_a_fresh_scope_each_iteration():
@@ -99,10 +154,7 @@ hallucinate(total)✨
 hallucinate(doubled)✨"""
     result = run_source(source)
     assert result.stdout == "10\n"
-    assert (
-        result.stderr
-        == "SlopLang runtime error at line 8: undefined variable 'doubled'\n"
-    )
+    assert result.stderr == "SlopLang runtime error at line 8: undefined variable 'doubled'\n"
 
 
 def test_parameters_are_local_and_mutable():
@@ -160,9 +212,7 @@ hallucinate(❌)✨
 hallucinate(f())✨
 hallucinate(f)✨
 hallucinate(hallucinate)✨"""
-    assert (
-        run(source) == "0\n-42\nstr\n✅\n❌\nnil\n<clanker f>\n<clanker hallucinate>\n"
-    )
+    assert run(source) == "0\n-42\nstr\n✅\n❌\nnil\n<clanker f>\n<clanker hallucinate>\n"
 
 
 def test_variation_selector_after_emoji_is_accepted():

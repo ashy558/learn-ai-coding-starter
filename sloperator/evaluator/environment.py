@@ -1,13 +1,24 @@
 from dataclasses import dataclass
+from enum import Enum, auto
 
 from sloperator.errors import SlopRuntimeError
 from sloperator.evaluator.values import Value
 
 
+class BindingKind(Enum):
+    MUTABLE = auto()
+    LOADBEARING = auto()
+    IMMUTABLE = auto()
+
+
 @dataclass
 class Binding:
     value: Value
-    mutable: bool
+    kind: BindingKind
+
+    @property
+    def mutable(self) -> bool:
+        return self.kind is BindingKind.MUTABLE
 
 
 class Environment:
@@ -15,16 +26,18 @@ class Environment:
         self.bindings: dict[str, Binding] = {}
         self.parent = parent
 
-    def declare(self, name: str, value: Value, mutable: bool, line: int) -> None:
+    def declare(self, name: str, value: Value, kind: BindingKind, line: int) -> None:
         if name in self.bindings:
             raise SlopRuntimeError(line, f"'{name}' is already declared in this scope")
-        self.bindings[name] = Binding(value, mutable)
+        self.bindings[name] = Binding(value, kind)
 
     def get(self, name: str, line: int) -> Value:
         return self.lookup(name, line).value
 
     def assign(self, name: str, value: Value, line: int) -> None:
         binding = self.lookup(name, line)
+        if binding.kind is BindingKind.LOADBEARING:
+            raise SlopRuntimeError(line, f"cannot assign to loadbearing '{name}'")
         if not binding.mutable:
             raise SlopRuntimeError(line, f"cannot assign to immutable binding '{name}'")
         binding.value = value

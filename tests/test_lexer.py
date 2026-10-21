@@ -47,6 +47,17 @@ def test_hallucinate_is_an_identifier_not_a_keyword():
     assert tokenize("hallucinate")[0].type is TokenType.IDENTIFIER
 
 
+def test_loadbearing_is_a_keyword():
+    assert [token.type for token in tokenize("loadbearing LIMIT = 100✨")] == [
+        TokenType.LOADBEARING,
+        TokenType.IDENTIFIER,
+        TokenType.EQUAL,
+        TokenType.NUMBER,
+        TokenType.SPARKLES,
+        TokenType.EOF,
+    ]
+
+
 def test_string_may_contain_em_dash_and_opening_quote():
     assert tokenize("“x — “y”")[0].literal == "x — “y"
 
