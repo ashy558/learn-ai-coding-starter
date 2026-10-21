@@ -6,6 +6,13 @@ Files use the `.slop` extension and run with:
 uv run sloperator.py path/to/program.slop
 ```
 
+To check a file's syntax without executing it, use `--check`. It prints nothing and
+exits 0 when the file parses, or prints the lexical or syntax error and exits 1:
+
+```bash
+uv run sloperator.py --check path/to/program.slop
+```
+
 ## Example
 
 ```slop
