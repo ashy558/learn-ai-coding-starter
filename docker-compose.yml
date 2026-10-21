@@ -8,11 +8,11 @@ services:
     environment:
       UV_LINK_MODE: copy
     volumes:
-      - ./:/root/workspace
       - ~/.config/opencode:/root/.config/opencode:ro
-      - sloperator-venv:/root/workspace/.venv
     entrypoint:
-      ["/bin/sh", "-c", "cd /root/workspace && uv sync && opencode serve"]
-
-volumes:
-  sloperator-venv:
+      [
+        "/bin/sh",
+        "-c",
+        "git clone https://github.com/ashy558/learn-ai-coding-starter.git && cd
+        learn-ai-coding-starter && uv sync && opencode serve",
+      ]
