@@ -1,0 +1,11 @@
+services:
+  sloperator-sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sloperator-sandbox:latest
+    container_name: sloperator-sandbox
+    user: "1000:1000"
+    volumes:
+      - ./:/workspace
+      - ~/.config/opencode:/root/.config/opencode:ro
