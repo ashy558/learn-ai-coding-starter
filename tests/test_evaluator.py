@@ -19,6 +19,10 @@ def fails(source: str) -> str:
     ("expression", "expected"),
     [
         ("7 / 2", "3"),
+        ("-7 / 2", "-3"),
+        ("7 / -2", "-3"),
+        ("-7 / -2", "3"),
+        ("-8 / 2", "-4"),
         ("2 - 3 * 4", "-10"),
         ("(2 - 3) * 4", "-4"),
         ("--5", "5"),
@@ -48,7 +52,10 @@ def test_equality_never_coerces(expression: str, expected: str):
 
 
 def test_short_circuit_skips_right_operand():
-    assert run("hallucinate(❌ && 1 / 0 == 0)✨\nhallucinate(✅ || 1 / 0 == 0)✨") == "❌\n✅\n"
+    assert (
+        run("hallucinate(❌ && 1 / 0 == 0)✨\nhallucinate(✅ || 1 / 0 == 0)✨")
+        == "❌\n✅\n"
+    )
 
 
 def test_logical_operands_must_be_booleans():
@@ -92,7 +99,10 @@ hallucinate(total)✨
 hallucinate(doubled)✨"""
     result = run_source(source)
     assert result.stdout == "10\n"
-    assert result.stderr == "SlopLang runtime error at line 8: undefined variable 'doubled'\n"
+    assert (
+        result.stderr
+        == "SlopLang runtime error at line 8: undefined variable 'doubled'\n"
+    )
 
 
 def test_parameters_are_local_and_mutable():
@@ -124,8 +134,14 @@ hallucinate(find())✨"""
     ("source", "message"),
     [
         ("hallucinate(-“a”)✨", "operand of unary '-' must be a number, got string"),
-        ("hallucinate(“a” < “b”)✨", "operands of '<' must be numbers, got string and string"),
-        ("hallucinate(1 - ✅)✨", "operands of '-' must be numbers, got number and boolean"),
+        (
+            "hallucinate(“a” < “b”)✨",
+            "operands of '<' must be numbers, got string and string",
+        ),
+        (
+            "hallucinate(1 - ✅)✨",
+            "operands of '-' must be numbers, got number and boolean",
+        ),
         ("ralph 0 { }", "ralph condition must be a boolean, got number"),
         ("hallucinate(1)(2)✨", "can only call clankers, got nil"),
     ],
@@ -144,7 +160,9 @@ hallucinate(❌)✨
 hallucinate(f())✨
 hallucinate(f)✨
 hallucinate(hallucinate)✨"""
-    assert run(source) == "0\n-42\nstr\n✅\n❌\nnil\n<clanker f>\n<clanker hallucinate>\n"
+    assert (
+        run(source) == "0\n-42\nstr\n✅\n❌\nnil\n<clanker f>\n<clanker hallucinate>\n"
+    )
 
 
 def test_variation_selector_after_emoji_is_accepted():
