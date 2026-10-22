@@ -23,3 +23,10 @@ def test_multiplication_before_addition_changes_the_result():
     result = run_source("hallucinate(1 + 2 * 3)✨")
     assert result.stderr == ""
     assert result.stdout == "7\n"
+
+
+def test_comparison_binds_tighter_than_equality():
+    expr = only_expression("1 < 2 == ✅✨")
+    assert isinstance(expr, Binary) and expr.operator.type is TokenType.EQUAL_EQUAL
+    assert isinstance(expr.left, Binary) and expr.left.operator.type is TokenType.LESS
+    assert run_source("hallucinate(1 < 2 == ✅)✨").stdout == "✅\n"
