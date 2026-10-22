@@ -1,142 +1,11 @@
 # Sloperator
 
-A SlopLang interpreter.
-
-## Language Reference
-
-Files use the `.slop` extension and run with:
-
-```bash
-uv run sloperator.py path/to/program.slop
-```
-
-To check a file's syntax without executing it, use `--check`. It prints nothing and
-exits 0 when the file parses, or prints the lexical or syntax error and exits 1:
-
-```bash
-uv run sloperator.py --check path/to/program.slop
-```
-
-### Example
-
-```slop
-— Comments start with an em dash. Statements end with sparkles.
-clanker describe(count) {
-    vibe count > 1 {
-        ship “big slop”✨
-    } nah {
-        ship “small slop”✨
-    }
-}
-
-loadbearing MAX = 3✨
-slop count = 0✨
-
-ralph count < MAX {
-    hallucinate(describe(count))✨
-    count = count + 1✨
-}
-```
-
-Prints `small slop` twice, then `big slop`.
-
-### The Slop Words
-
-| SlopLang      | Conventional | Meaning                                                 |
-| ------------- | ------------ | ------------------------------------------------------- |
-| `slop`        | `let`        | Declare a mutable variable                              |
-| `loadbearing` | `const`      | Declare an immutable variable                           |
-| `clanker`     | `fn`         | Define a function                                       |
-| `vibe`        | `if`         | Conditional                                             |
-| `nah`         | `else`       | Else branch                                             |
-| `ralph`       | `while`      | Loop while a condition is `✅`                          |
-| `hallucinate` | `print`      | Print values separated by spaces, then a newline        |
-| `ship`        | `return`     | Return one value from a function                        |
-| `✨`          | `;`          | Statement terminator (required)                         |
-| `—`           | `//`         | Start a line comment                                    |
-| `“ ”`         | `" "`        | String delimiters (straight quotes are a lexical error) |
-| `✅`          | `true`       | Boolean true literal                                    |
-| `❌`          | `false`      | Boolean false literal                                   |
-
-There are no other reserved words, and no `break`, `continue`, `for`, or `else if`.
-
-### Source Text
-
-UTF-8, case-sensitive. Identifiers match `[A-Za-z_][A-Za-z0-9_]*`. Spaces, tabs, and newlines are whitespace; newlines do not end statements.
-
-Emoji tokens are `✨` (U+2728), `✅` (U+2705), and `❌` (U+274C), each optionally followed by the variation selector U+FE0F, which some keyboards emit. `✨` must follow variable declarations, assignments, `ship`, and expression statements. It never follows a block's closing brace. `—` (U+2014) starts a comment that runs to end of line.
-
-Strings open with `“` (U+201C), close with `”` (U+201D), and support escapes `\n`, `\t`, `\”`, and `\\`. A string cannot contain a raw newline. Unknown escapes and unterminated strings are lexical errors.
-
-### Values
-
-| Type     | Examples                            | Notes                        |
-| -------- | ----------------------------------- | ---------------------------- |
-| Number   | `0`, `42`, `9001`                   | Arbitrary-precision integers |
-| String   | `“hello”`                           | Immutable Unicode text       |
-| Boolean  | `✅`, `❌`                          | Required by conditions       |
-| Nil      | Result of a function with no `ship` | No source literal            |
-| Function | `hallucinate`, `describe`           | Built-in or user-defined     |
-
-No implicit conversions.
-
-### Variables
-
-`slop` declares a mutable variable and `loadbearing` declares an immutable one;
-both require an initializer. A scope cannot declare a name twice, but an inner
-block may shadow an outer name.
-
-```slop
-loadbearing LIMIT = 100✨
-slop score = 10✨
-score = score + 5✨
-score = score + 1✨
-```
-
-Assignment is a statement, not an expression: `name = expression✨`. It updates
-the nearest existing variable. Assigning a `loadbearing` name is a runtime error
-(`cannot assign to loadbearing 'LIMIT'`). Reading or assigning an undefined name
-is also a runtime error.
-
-Every brace block is a lexical scope. Assignment searches the current scope, then each enclosing scope.
-
-### Control Flow
-
-Conditions take no parentheses and must be booleans; there is no truthiness.
-
-```slop
-vibe score >= 10 {
-    hallucinate(“ship it”)✨
-} nah {
-    hallucinate(“keep working”)✨
-}
-
-ralph score > 0 {
-    score = score - 1✨
-}
-```
-
-`nah` must be followed by a block; nest a `vibe` for another condition. `ralph` checks its condition before each iteration.
-
 A tree-walking interpreter for [SlopLang](docs/spec.md), written in Python.
 
 ```bash
 uv run sloperator.py examples/fib.slop
+uv run sloperator.py --check examples/fib.slop   # parse only; exits 1 on error
 ```
-
-## Layout
-
-| Path                    | What it is                                             |
-| ----------------------- | ------------------------------------------------------ |
-| `sloperator.py`         | Command-line entrypoint                                |
-| `sloperator/lexer/`     | Source text to tokens                                  |
-| `sloperator/parser/`    | Tokens to AST (`ast.py` holds the node definitions)    |
-| `sloperator/evaluator/` | Walks the AST: values, environments, the interpreter   |
-| `sloperator/runner.py`  | Runs source through all three stages                   |
-| `docs/spec.md`          | The language specification                             |
-| `examples/`             | Example programs                                       |
-| `tests/`                | Pytest suite                                           |
-| `playground/`           | A tiny web server and editor page for running programs |
 
 ## Validation
 
@@ -147,26 +16,33 @@ uv run ruff check          # linting
 uv run ty check            # type checking
 ```
 
-## Sandbox
+Run all four before submitting changes.
 
-`Dockerfile` extends the OpenCode sandbox image with `uv`, `python3`, and `git`.
-`docker-compose.yml` bind-mounts the repository, but keeps `.venv` and the uv
-caches in named volumes. A venv built on the host contains absolute paths to the
-host's Python and cannot run in the container, so the two environments must not
-share one. The image entrypoint runs `uv sync --frozen` (or `uv sync` when there
-is no lockfile) before launching OpenCode.
+The language — slop words, tokens, values, scoping, and control flow — is
+specified in [`docs/spec.md`](docs/spec.md); `examples/` has running programs.
 
-After changing the Dockerfile, compose file, or dependencies, rebuild and
-recreate the container:
+## Layout
+
+| Path | What it is |
+| --- | --- |
+| `sloperator.py` | Command-line entrypoint |
+| `sloperator/lexer/` | Source text to tokens |
+| `sloperator/parser/` | Tokens to AST (`ast.py` holds the nodes) |
+| `sloperator/evaluator/` | Walks the AST: values, environments, interpreter |
+| `sloperator/runner.py` | Runs source through all three stages |
+| `docs/spec.md` | Language specification |
+| `examples/` | Example programs |
+| `tests/` | Pytest suite |
+| `playground/` | Web server and editor for running programs |
+
+## Playground and sandbox
 
 ```bash
-docker compose up -d --build
+uv run playground/server.py            # http://localhost:8080
+docker compose up -d --build           # rebuild after Docker changes
 ```
 
-## Playground
-
-```bash
-uv run playground/server.py
-```
-
-Then open <http://localhost:8080>.
+`Dockerfile` extends the OpenCode image with `uv`, `python3`, and `git`.
+`docker-compose.yml` keeps `.venv` and uv caches in named volumes: a host-built
+venv has absolute host paths and cannot run in the container. The entrypoint runs
+`uv sync --frozen` (or `uv sync` without a lockfile) before launching OpenCode.
