@@ -4,6 +4,6 @@
 .pytest_cache/
 __pycache__/
 .out
-/uv.lock
+logs/
 node_modules/
 /.env
