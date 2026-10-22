@@ -19,5 +19,6 @@
     {
       "action": "edit",
     { "action": "subagent", "resource": "explore", "effect": "deny" },
+    { "action": "read", "resource": "*.env", "effect": "deny" },
   ],
 }
