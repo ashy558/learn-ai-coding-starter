@@ -1,0 +1,8 @@
+— Count down from three, then lift off.
+loadbearing START = 3✨
+slop count = START✨
+ralph count > 0 {
+    hallucinate(count)✨
+    count = count - 1✨
+}
+hallucinate(“liftoff”)✨
