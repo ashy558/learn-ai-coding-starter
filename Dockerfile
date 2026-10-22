@@ -1,4 +1,4 @@
-FROM ghcr.io/anomalyco/opencode:2.1.2
+FROM ghcr.io/anomalyco/opencode:2.1.3
 
 WORKDIR /root
 
