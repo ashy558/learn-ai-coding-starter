@@ -1,89 +1,67 @@
 # AGENTS.md
 
 Sloperator is a tree-walking interpreter for SlopLang, a Python 3.13 project
-managed with `uv`. `docs/spec.md` is the source of truth for language behavior;
-`README.md` has the layout table.
+managed with `uv`. Language behavior is defined in
+[`docs/spec.md`](docs/spec.md); treat it as authoritative and do not infer
+semantics from examples alone.
 
-## Commands
+## Project layout
 
-- Run: `uv run sloperator.py examples/fib.slop`
-- Parse only: `uv run sloperator.py --check examples/fib.slop` (silent on
-  success; exit 1 on a lexical or syntax error)
-- Tests: `uv run pytest`; focus with `uv run pytest tests/test_errors.py -q` or
-  `uv run pytest -k <pattern>`
-- Format: `uv run ruff format --check`
-- Lint: `uv run ruff check`
-- Types: `uv run ty check`
+| Path | Role |
+| --- | --- |
+| `sloperator.py` | CLI entrypoint and exit codes |
+| `sloperator/lexer/` | Source text to tokens |
+| `sloperator/parser/` | Tokens to AST (`ast.py` holds the nodes) |
+| `sloperator/evaluator/` | AST walking: values, environments, interpreter |
+| `sloperator/runner.py` | Runs source through all three stages |
+| `docs/spec.md` | Language specification |
+| `examples/` | Runnable `.slop` programs |
+| `tests/` | Pytest suite |
+| `playground/` | Web server and editor |
 
-Run all four checks before committing; there is no CI. The `validate` skill only
-runs pytest and ruff, so it does not cover `ty`.
+`sloperator/parser/AGENTS.md` adds conventions for parser changes.
 
-The `run_slop` tool (`.opencode/plugins/run-slop.ts`) runs a `.slop` file from
-the repo root with a 30-second timeout. Prefer it for quick runs and
-experiments.
+`.slop` files use non-ASCII syntax (`✨`, `“…”`, `—`, `✅`, `❌`); preserve
+those characters when editing examples, tests, and docs.
 
-## Language and tests
+## Validation
 
-- `.slop` is UTF-8 with non-ASCII syntax: `✨` ends statements, `“…”` are
-  strings, `—` starts comments, and `✅`/`❌` are booleans. Straight quotes,
-  `;`, and `//` are lexical errors. Preserve these characters when editing
-  examples, tests, and docs.
-- `tests/test_errors.py` asserts complete diagnostics
-  (`SlopLang <kind> error at line N: ...`). Update that test and `docs/spec.md`
-  when changing an error message.
-- `tests/test_examples.py` auto-discovers every `examples/*.slop`; each must
-  exit 0, produce non-empty stdout, and write nothing to stderr. Adding an
-  example adds a test.
-- `tests/test_cli.py` invokes the CLI with `sys.executable`, not `uv`.
-- Test through `sloperator.runner.run_source` to get `stdout`, `stderr`, and
-  `exit_code`; `tests/test_evaluator.py` has `run`/`fails` helpers.
-- Python's `bool` is an `int`, but SlopLang must not coerce: `✅ == 1` is false
-  and `is_number` excludes booleans. Tests enforce this.
-- Integer division truncates toward zero (`-7 / 2` is `-3`); do not use Python
-  `//` directly.
-- Errors must stay `SlopError` subclasses formatted by `SlopError.__str__`.
-  Anything else escapes as a traceback, which the CLI tests forbid.
+Run all four before committing; there is no CI:
 
-## Wiring
+```bash
+uv run pytest               # tests
+uv run ruff format --check  # formatting
+uv run ruff check           # linting
+uv run ty check             # type checking
+```
 
-Pipeline: `tokenize` (`lexer/scanner.py`) -> `parse` (`parser/parser.py`, nodes
-in `parser/ast.py`) -> `Interpreter.run` (`evaluator/interpreter.py`).
-`runner.py` joins the stages and converts errors to `RunResult`; `sloperator.py`
-owns argv and exit codes (0 success, 1 Slop error, 2 usage or unreadable file).
+The `validate` skill runs only pytest and ruff, so it does not cover `ty`.
 
-- The interpreter pattern-matches AST dataclasses. A new statement or expression
-  needs the node, parser support, interpreter handling, docs, and tests.
-- Scopes are `Environment` parent chains: `slop` is mutable, `loadbearing` and
-  `clanker` bindings are immutable, and assignment updates the nearest binding.
-  `clanker` declarations are top-level only; `ship` uses the `ShipSignal`
-  exception.
-- Call depth is capped at 500 and the Python recursion limit is raised to
-  20,000, so runtime errors stay traceback-free.
-- No runtime dependencies are declared; the interpreter uses only the standard
-  library. Dev tools are pytest, ruff, and ty.
+## When to add regression tests
 
-## Known spec gaps
+Add a regression test whenever you fix a bug or correct behavior that could
+silently return. The test should fail on the old code and pass on the new code.
 
-`docs/spec.md` is authoritative. Current code disagrees in two places:
+- Put focused regression tests in a clearly named file, such as
+  `tests/test_lexer_regression.py`, `tests/test_unary_minus.py`, or
+  `tests/test_nested_calls.py`.
+- Change or add a diagnostic: update `tests/test_errors.py`, which asserts
+  complete messages (`SlopLang <kind> error at line N: ...`), and update
+  `docs/spec.md`.
+- Add or change syntax or semantics: add lexer, parser, and evaluator tests as
+  applicable, and update `docs/spec.md`.
+- Keep invariants covered, especially the ones Python would otherwise blur:
+  booleans are not numbers (`✅ == 1` is false), integer division truncates
+  toward zero, and runtime errors stay `SlopError` subclasses rather than
+  escaping as tracebacks.
+- Test through `sloperator.runner.run_source` to assert `stdout`, `stderr`, and
+  `exit_code`; `tests/test_evaluator.py` has `run`/`fails` helpers. CLI tests
+  invoke `sloperator.py` with `sys.executable`, not `uv`.
+- `tests/test_examples.py` auto-discovers every `examples/*.slop`, so adding an
+  example also adds a test. Do not rely on an example as the only regression
+  coverage.
 
-- `ralph` executes its body once before checking the condition
-  (`Interpreter.execute`).
-- A bare nested `{ ... }` block inside a `clanker` runs with the globals as its
-  parent, so assigning an enclosing local from it fails. Top-level nested blocks
-  work.
-
-Do not encode either behavior in new examples or tests unless you are
-deliberately preserving it.
-
-## Playground and sandbox
-
-- `uv run playground/server.py [port]` serves the playground at
-  `http://localhost:8080`; each POST `/run` has a 5-second timeout and appends
-  to `logs/runs.log` (gitignored and watcher-ignored).
-- `docker compose up -d --build` builds an OpenCode sandbox, not the playground.
-  Its entrypoint clones the GitHub repo and runs `opencode serve`, so only
-  pushed commits are present; the host `.venv` is never used by the container.
-- `opencode.jsonc` is JSONC (trailing commas are valid); it denies reading
-  `.env` and the `explore` subagent. Don't bypass those. A user-level shell
-  guard also rejects commands containing `.env`, including `self.environment`;
-  use the `grep`/`read` tools for that text.
+Two known code/spec mismatches must not be encoded in new examples or tests
+unless deliberately preserving them: `ralph` executes its body once before
+checking the condition, and a bare nested `{ ... }` block inside a `clanker`
+uses the globals as its parent. See `docs/spec.md` for the intended behavior.
