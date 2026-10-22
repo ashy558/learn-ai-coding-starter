@@ -215,6 +215,13 @@ hallucinate(hallucinate)✨"""
     assert run(source) == "0\n-42\nstr\n✅\n❌\nnil\n<clanker f>\n<clanker hallucinate>\n"
 
 
+def test_hallucinate_accepts_any_number_of_arguments():
+    source = """hallucinate()✨
+hallucinate(“hello”)✨
+hallucinate(“count”, 3, ✅, ❌)✨"""
+    assert run(source) == "\nhello\ncount 3 ✅ ❌\n"
+
+
 def test_variation_selector_after_emoji_is_accepted():
     assert run("hallucinate(✅️)✨️\nhallucinate(❌️)✨️") == "✅\n❌\n"
 
