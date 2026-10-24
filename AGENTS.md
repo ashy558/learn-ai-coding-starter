@@ -70,7 +70,7 @@ silently return. The test should fail on the old code and pass on the new code.
   example also adds a test. Do not rely on an example as the only regression
   coverage.
 
-Two known code/spec mismatches must not be encoded in new examples or tests
-unless deliberately preserving them: `ralph` executes its body once before
-checking the condition, and a bare nested `{ ... }` block inside a `clanker`
-uses the globals as its parent. See `docs/spec.md` for the intended behavior.
+One known code/spec mismatch must not be encoded in new examples or tests
+unless deliberately preserving it: a bare nested `{ ... }` block inside a
+`clanker` uses the globals as its parent. See `docs/spec.md` for the intended
+behavior.
