@@ -24,6 +24,12 @@
         "type": "remote",
         "url": "https://mcp.context7.com/mcp",
         "oauth": false,
+        "enabled": false,
+      },
+      "notion": {
+        "type": "remote",
+        "url": "https://mcp.notion.com/mcp",
+        "enabled": false,
       },
     }
   },
