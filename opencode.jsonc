@@ -17,6 +17,7 @@
     { "action": "shell", "resource": "uv run ruff *", "effect": "allow" },
     { "action": "shell", "resource": "uv run ty *", "effect": "allow" },
     { "action": "subagent", "resource": "explore", "effect": "deny" },
+    { "action": "skill", "resource": "create-test-program", "effect": "ask" },
     { "action": "read", "resource": "*.env", "effect": "deny" },
   ],
 }
