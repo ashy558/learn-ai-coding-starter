@@ -35,6 +35,9 @@ uv run ruff check           # linting
 uv run ty check             # type checking
 ```
 
+Comparison and equality tests live in `tests/test_comparisons.py`; run those
+alone with `uv run pytest tests/test_comparisons.py`.
+
 The `validate` skill runs only pytest and ruff, so it does not cover `ty`.
 
 ## When to add regression tests
