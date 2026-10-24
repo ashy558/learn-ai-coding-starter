@@ -57,13 +57,24 @@ shell tool's working directory rather than changing directories in the command.
    ```
 
    The dry run is only a preflight: the server grades on submission. If no UUID
-   was supplied, do not guess one and do not silently let `bootdev submit` pick
-   a different lesson. Ask the user for the lesson ID, or confirm rerunning the
-   next lesson with `bootdev submit`.
+   was supplied, `bootdev submit` does not silently pick a lesson: it announces
+   `Submitting next lesson: <n> - <title>` and stops at an interactive
+   `Continue? [y/N]:` prompt. Check that the announced title is the lesson just
+   checked in step 3; if it is not, answer `n` and ask the user for the lesson
+   ID. Only answer `y` after the user has approved submitting that lesson.
 
-   `bootdev submit` also exits `0` when the lesson fails; it exits `1` only for
-   fatal or API/auth errors. Read the submitted verdict (`Tests failed!`,
-   `All tests passed! 🎉`, XP, and the website) rather than the exit code.
+   A non-interactive shell cannot answer the prompt: stdin reads end-of-file,
+   the command prints `Error: submission canceled`, and it exits `1`. Once the
+   user has approved, feed the answer in for that run:
+
+   ```bash
+   printf 'y\n' | bootdev submit <uuid>
+   ```
+
+   `bootdev submit` exits `0` when the lesson passes or fails, but `1` when the
+   prompt is canceled or for fatal/API/auth errors. Read the submitted verdict
+   (`Tests failed!`, `All tests passed! 🎉`, XP, and the website) rather than the
+   exit code.
 6. Report each dry-run expectation and whether it matched, then the submission
    verdict and XP when Boot.dev prints it.
 
@@ -73,6 +84,8 @@ shell tool's working directory rather than changing directories in the command.
   be checked from the printed output.
 - Do not claim a dry run passed because the exit code is `0` or because no
   error appeared; only a complete manual expectation check counts.
+- Never answer the `Continue? [y/N]:` prompt before the user approves, and only
+  for the lesson named in it. `bootdev submit` does not pick a lesson silently.
 - Do not claim submission success without `All tests passed! 🎉` in the submit
   output or equivalent confirmation on the website.
 - Keep proposed fixes separate from applied changes; wait for approval.

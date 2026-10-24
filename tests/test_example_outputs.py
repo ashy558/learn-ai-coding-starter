@@ -20,3 +20,10 @@ def test_equality_output():
         "equality",
         "✅\n❌\n❌\n",
     )
+
+
+def test_short_circuit_output():
+    assert_example_output(
+        "short-circuit",
+        "❌\n✅\n",
+    )
