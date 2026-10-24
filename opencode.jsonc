@@ -16,8 +16,6 @@
     { "action": "shell", "resource": "uv run pytest *", "effect": "allow" },
     { "action": "shell", "resource": "uv run ruff *", "effect": "allow" },
     { "action": "shell", "resource": "uv run ty *", "effect": "allow" },
-    {
-      "action": "edit",
     { "action": "subagent", "resource": "explore", "effect": "deny" },
     { "action": "read", "resource": "*.env", "effect": "deny" },
   ],
