@@ -38,7 +38,7 @@ uv run ty check             # type checking
 Comparison and equality tests live in `tests/test_comparisons.py`; run those
 alone with `uv run pytest tests/test_comparisons.py`.
 
-The `validate` skill runs only pytest and ruff, so it does not cover `ty`.
+The `validate` skill runs these same four checks, so it covers `ty` too.
 
 ## Formatting
 
