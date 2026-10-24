@@ -40,6 +40,12 @@ alone with `uv run pytest tests/test_comparisons.py`.
 
 The `validate` skill runs only pytest and ruff, so it does not cover `ty`.
 
+## Formatting
+
+Run `uv run ruff format` after any code change. Make formatting changes only
+as a last step, once all the logic changes are done, so formatting diffs stay
+separate from behavioral ones.
+
 ## When to add regression tests
 
 Add a regression test whenever you fix a bug or correct behavior that could
