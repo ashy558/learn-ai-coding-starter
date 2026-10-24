@@ -40,6 +40,12 @@ CASES = [
         "expected '}' to close block, but reached end of file",
     ),
     ("hallucinate(1 / 0)✨", "runtime", 1, "division by zero"),
+    (
+        "hallucinate(!1)✨",
+        "runtime",
+        1,
+        "operand of unary '!' must be a boolean, got number",
+    ),
     ("hallucinate(nope)✨", "runtime", 1, "undefined variable 'nope'"),
     ("hallucinate(later())✨\nclanker later() {\n}", "runtime", 1, "undefined variable 'later'"),
     ("clanker f() {\n}\nf = 2✨", "runtime", 3, "cannot assign to immutable binding 'f'"),

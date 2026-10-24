@@ -138,7 +138,7 @@ hallucinate()✨   — a blank line
 
 ## Operators
 
-`+` adds numbers or concatenates strings. `-`, `*`, `/` accept only numbers; division truncates toward zero (`-7 / 2` is `-3`, not floor division's `-4`) and division by zero is a runtime error. `<`, `<=`, `>`, `>=` compare numbers. `==`, `!=` compare any values; different types are unequal, and functions are equal only to themselves. `&&` and `||` require booleans and short-circuit. Unary `-` negates a number.
+`+` adds numbers or concatenates strings. `-`, `*`, `/` accept only numbers; division truncates toward zero (`-7 / 2` is `-3`, not floor division's `-4`) and division by zero is a runtime error. `<`, `<=`, `>`, `>=` compare numbers. `==`, `!=` compare any values; different types are unequal, and functions are equal only to themselves. `&&` and `||` require booleans and short-circuit. Unary `-` negates a number. Unary `!` flips a boolean, so `!✅` is `❌`, `!❌` is `✅`, and `!!✅` is `✅`; it requires a boolean operand, and applying it to a number, string, nil, or function is a runtime error.
 
 Precedence, lowest to highest:
 
@@ -148,7 +148,7 @@ Precedence, lowest to highest:
 4. `<`, `<=`, `>`, `>=`
 5. `+`, `-`
 6. `*`, `/`
-7. Unary `-`
+7. Unary `-`, `!`
 8. Calls
 9. Literals, names, `( )`
 
@@ -180,7 +180,7 @@ equality       -> comparison ( ( "==" | "!=" ) comparison )* ;
 comparison     -> term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
 term           -> factor ( ( "+" | "-" ) factor )* ;
 factor         -> unary ( ( "*" | "/" ) unary )* ;
-unary          -> "-" unary | call ;
+unary          -> ( "-" | "!" ) unary | call ;
 call           -> primary ( "(" arguments? ")" )* ;
 arguments      -> expression ( "," expression )* ;
 primary        -> NUMBER | STRING | "✅" | "❌"
@@ -196,6 +196,7 @@ SlopLang lexical error at line 1: straight quotes are not supported, use “ and
 SlopLang syntax error at line 2: expected ✨ after variable declaration, found 'slop'
 SlopLang runtime error at line 3: division by zero
 SlopLang runtime error at line 4: cannot assign to loadbearing 'LIMIT'
+SlopLang runtime error at line 5: operand of unary '!' must be a boolean, got number
 ```
 
 ## Typing SlopLang
