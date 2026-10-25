@@ -22,6 +22,7 @@
     "servers": {
       "playwright": {
         "type": "local",
+        "disabled": true,
         "command": [
           "bunx",
           "--bun",
@@ -29,6 +30,16 @@
           "--isolated",
           "--browser",
           "chromium",
+        ],
+      },
+      "chrome-devtools": {
+        "type": "local",
+        "command": [
+          "bunx",
+          "--bun",
+          "chrome-devtools-mcp@latest",
+          "--executablePath=/usr/bin/chromium",
+          "--isolated",
         ],
       },
       "context7": {
