@@ -6,4 +6,5 @@ __pycache__/
 .out
 logs/
 node_modules/
+/.playwright-mcp/
 /.env
