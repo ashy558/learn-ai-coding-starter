@@ -8,7 +8,7 @@
       body {
         font-family: system-ui, sans-serif;
         margin: 0;
-        padding: 1.5rem;
+        padding: clamp(0.75rem, 3vw, 1.5rem);
         background: #f6f6f4;
         color: #222;
       }
@@ -63,7 +63,7 @@
         resize: vertical;
       }
       pre {
-        min-width: 800px;
+        min-width: 0;
         min-height: 6rem;
         margin: 0.75rem 0 0;
         padding: 0.75rem;
