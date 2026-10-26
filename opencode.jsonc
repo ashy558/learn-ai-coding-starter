@@ -16,7 +16,6 @@
     { "action": "shell", "resource": "uv run pytest *", "effect": "allow" },
     { "action": "shell", "resource": "uv run ruff *", "effect": "allow" },
     { "action": "shell", "resource": "uv run ty *", "effect": "allow" },
-    { "action": "shell", "resource": "printf 'y\n' | bootdev submit", "effect": "allow" },
     { "action": "read", "resource": "*.env", "effect": "deny" },
   ],
   "mcp": {
