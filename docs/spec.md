@@ -87,7 +87,7 @@ score = score + 5✨
 score = score + 1✨
 ```
 
-Assignment is a statement, not an expression: `name = expression✨`. It updates the nearest existing variable. Assigning a `loadbearing` name is a runtime error (`cannot assign to loadbearing 'LIMIT'`); assignment is checked when it executes, so unreached assignments do not fail. Reading or assigning an undefined name is a runtime error.
+Assignment is a statement, not an expression: `name = expression✨` or `name += expression✨`. Both update the nearest existing variable. For `+=`, the right-hand expression is evaluated first, then added to the variable's current value. Numbers are added and strings are concatenated; other type combinations are runtime errors. Assigning a `loadbearing` name is a runtime error (`cannot assign to loadbearing 'LIMIT'`); assignment is checked when it executes, so unreached assignments do not fail. Reading or assigning an undefined name is a runtime error.
 
 Every brace block is a lexical scope. Assignment searches the current scope, then each enclosing scope.
 
@@ -166,7 +166,7 @@ variableDecl   -> ( "slop" | "loadbearing" ) IDENTIFIER "=" expression "✨" ;
 
 statement      -> assignStmt | ifStmt | loopStmt | returnStmt
                 | block | expressionStmt ;
-assignStmt     -> IDENTIFIER "=" expression "✨" ;
+assignStmt     -> IDENTIFIER ( "=" | "+=" ) expression "✨" ;
 ifStmt         -> "vibe" expression block ( "nah" block )? ;
 loopStmt       -> "ralph" expression block ;
 returnStmt     -> "ship" expression "✨" ;

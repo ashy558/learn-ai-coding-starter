@@ -35,12 +35,16 @@ class Environment:
         return self.lookup(name, line).value
 
     def assign(self, name: str, value: Value, line: int) -> None:
+        binding = self.mutable_binding(name, line)
+        binding.value = value
+
+    def mutable_binding(self, name: str, line: int) -> Binding:
         binding = self.lookup(name, line)
         if binding.kind is BindingKind.LOADBEARING:
             raise SlopRuntimeError(line, f"cannot assign to loadbearing '{name}'")
         if not binding.mutable:
             raise SlopRuntimeError(line, f"cannot assign to immutable binding '{name}'")
-        binding.value = value
+        return binding
 
     def lookup(self, name: str, line: int) -> Binding:
         env: Environment | None = self
