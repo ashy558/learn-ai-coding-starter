@@ -35,6 +35,7 @@
       },
       "chrome-devtools": {
         "type": "local",
+        "disabled": true,
         "command": [
           "bunx",
           "--bun",
@@ -47,12 +48,12 @@
         "type": "remote",
         "url": "https://mcp.context7.com/mcp",
         "oauth": false,
-        "enabled": false,
+        "disabled": true,
       },
       "notion": {
         "type": "remote",
         "url": "https://mcp.notion.com/mcp",
-        "enabled": false,
+        "disabled": true,
       },
     }
   },
